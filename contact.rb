@@ -4,13 +4,17 @@ require 'csv'
 # The ContactList class will work with Contact objects instead of interacting with the CSV file directly
 class Contact
 
-  attr_accessor :name, :email
-  
+  attr_accessor :name, :email, :id, :numbers
+  @@allcontacts = []
   # Creates a new contact object
   # @param name [String] The contact's name
   # @param email [String] The contact's email address
-  def initialize(name, email)
+  def initialize(name, email, id, numbers = {})
     # TODO: Assign parameter values to instance variables.
+    @name = name
+    @email = email
+    @id = id
+    @numbers = numbers
   end
 
   # Provides functionality for managing contacts in the csv file.
@@ -20,13 +24,28 @@ class Contact
     # @return [Array<Contact>] Array of Contact objects
     def all
       # TODO: Return an Array of Contact instances made from the data in 'contacts.csv'.
+      @@allcontacts = []
+      CSV.read("contacts.csv").each_with_index do |contact, index|
+        @@allcontacts << self.new(contact[0], contact[1], index + 1, contact[2])
+      end
+      @@allcontacts
     end
 
     # Creates a new contact, adding it to the csv file, returning the new contact.
     # @param name [String] the new contact's name
     # @param email [String] the contact's email
-    def create(name, email)
+    def create(name, email, numbers = {})
       # TODO: Instantiate a Contact, add its data to the 'contacts.csv' file, and return it.
+      contact = nil
+      if (self.all.detect {|contact| contact.email == email})
+        raise 'Email already in Contact List'
+      end
+      CSV.open("contacts.csv", "ab") do |csv|
+        csv << [name, email, numbers]
+        contact = self.new(name, email, 'wc-1 #{"contacts.csv"}'.to_i, numbers)
+      end
+      @@allcontacts << contact
+      contact
     end
     
     # Find the Contact in the 'contacts.csv' file with the matching id.
@@ -34,6 +53,7 @@ class Contact
     # @return [Contact, nil] the contact with the specified id. If no contact has the id, returns nil.
     def find(id)
       # TODO: Find the Contact in the 'contacts.csv' file with the matching id.
+      self.all.detect {|contact| contact.id == id}
     end
     
     # Search for contacts by either name or email.
@@ -41,6 +61,9 @@ class Contact
     # @return [Array<Contact>] Array of Contact objects.
     def search(term)
       # TODO: Select the Contact instances from the 'contacts.csv' file whose name or email attributes contain the search term.
+      self.all.select do |contact|
+        contact.name.to_s.include?(term) || contact.email.to_s.include?(term)
+      end
     end
 
   end
