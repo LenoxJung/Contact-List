@@ -24,7 +24,7 @@ class ContactList
       answer = "yes"
       puts "would you like to add a phone number?"
       answer = STDIN.gets.chomp
-      while (answer != "no")
+      until (answer == "no")
         puts "what type of phone number is this?"
         type = STDIN.gets.chomp
         puts "enter phone number: "
@@ -34,7 +34,7 @@ class ContactList
         answer = STDIN.gets.chomp
       end
       contact = Contact.create(name,email,numbers)
-      puts "contact created: #{contact.name} (#{contact.email}) #{contact.numbers}"
+      #puts "contact created: #{contact.name} (#{contact.email}) #{contact.numbers}"
     end
 
     def show(id)
@@ -76,6 +76,21 @@ class ContactList
       puts "#{counter} record(s) total"
     end
 
+    def delete(id)
+      contact = Contact.find(id)
+      contact.delete
+    end
+
+    def update(id)
+      contact = Contact.find(id)
+      puts "What would you like to change the name to"
+      name = STDIN.gets.chomp
+      puts "What would you like to change the email to"
+      email = STDIN.gets.chomp
+      contact.name = name
+      contact.email = email
+      contact.save
+    end
   end
 
 end
@@ -91,5 +106,9 @@ when "show"
   ContactList.show(ARGV[1])
 when "search"
   ContactList.search(ARGV[1])
+when "delete"
+  ContactList.delete(ARGV[1])
+when "update"
+  ContactList.update(ARGV[1])
 end
 
