@@ -20,27 +20,27 @@ class ContactList
       name = STDIN.gets.chomp
       puts "enter contact's email: "
       email = STDIN.gets.chomp
-      numbers = {}
-      answer = "yes"
-      puts "would you like to add a phone number?"
-      answer = STDIN.gets.chomp
-      until (answer == "no")
-        puts "what type of phone number is this?"
-        type = STDIN.gets.chomp
-        puts "enter phone number: "
-        number = STDIN.gets.chomp.to_i
-        numbers[type.to_sym] = number
-        puts "would you like to add a phone number?"
-        answer = STDIN.gets.chomp
-      end
-      contact = Contact.create(name,email,numbers)
-      #puts "contact created: #{contact.name} (#{contact.email}) #{contact.numbers}"
+      # numbers = {}
+      # answer = "yes"
+      # puts "would you like to add a phone number?"
+      # answer = STDIN.gets.chomp
+      # until (answer == "no")
+      #   puts "what type of phone number is this?"
+      #   type = STDIN.gets.chomp
+      #   # puts "enter phone number: "
+      #   # number = STDIN.gets.chomp.to_i
+      #   # numbers[type.to_sym] = number
+      #   puts "would you like to add a phone number?"
+      #   answer = STDIN.gets.chomp
+      # end
+      contact = Contact.create(name: name, email: email)
+      puts "contact created: #{contact.name} (#{contact.email})"
     end
 
     def show(id)
-      contact = Contact.find(id.to_i)
+      contact = Contact.find(id)
       if contact
-        puts "#{contact.name} (#{contact.email}) #{contact.numbers}"
+        puts "#{contact.name} (#{contact.email})"
       else 
         puts "couldn't find contact"
       end
@@ -50,7 +50,7 @@ class ContactList
       counter = 0
       list = Contact.all
       list.each_with_index do |contact, index|
-        puts "#{contact.id}: #{contact.name} (#{contact.email}) #{contact.numbers}"
+        puts "#{contact.id}: #{contact.name} (#{contact.email})"
         counter += 1
         if ((index+1) % 5 == 0 && list.size > index + 1)
           puts "press enter to view more"
@@ -63,10 +63,10 @@ class ContactList
 
     def search(term)
       counter = 0
-      list = Contact.search(term)
+      list = Contact.where("name LIKE ? OR email LIKE ?", "%#{term}%", "%#{term}%")
       if (list.size > 0)
         list.each do |contact|
-          puts "#{contact.id}: #{contact.name} (#{contact.email}) #{contact.numbers}"
+          puts "#{contact.id}: #{contact.name} (#{contact.email})"
           counter += 1
         end
       else 
@@ -78,7 +78,7 @@ class ContactList
 
     def delete(id)
       contact = Contact.find(id)
-      contact.delete
+      contact.destroy
     end
 
     def update(id)
@@ -94,6 +94,22 @@ class ContactList
   end
 
 end
+
+
+
+
+puts 'Establishing connection to database ...'
+ActiveRecord::Base.establish_connection(
+  adapter: 'postgresql',
+  database: 'contactv2',
+  username: 'development',
+  password: 'development',
+  host: 'localhost',
+  port: 5432,
+  pool: 5,
+  encoding: 'unicode',
+  min_messages: 'error'
+)
 
 case ARGV[0]
 when nil 
